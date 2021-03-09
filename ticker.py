@@ -1,5 +1,6 @@
 import requests
 import json
+import logging
 import argparse
 
 
@@ -10,7 +11,7 @@ def get_company_name(ticker):
     :param symbol: String holding ticker
     :return: String holding company name
     """
-    print("Checking if {} is valid ticker".format(ticker))
+    logging.debug("Checking if {} is valid ticker".format(ticker))
     url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query={}&region=1&lang=en".format(ticker)
     result = requests.get(url).json()
 
@@ -26,7 +27,7 @@ def ticker_seen(ticker):
     :param ticker:
     :return:
     """
-    print("Checking if {} already in list")
+    logging.debug("Checking if {} already in list")
     with open("seen_tickers.json", "r+") as file:
         data = json.load(file)
         if data[ticker]:
@@ -41,7 +42,7 @@ def update_seen_tickers(new_ticker: dict):
     Updates seen_tickers.json with new ticker
     :param new_ticker: dict holding ticker and company name: {"ticker": "company name"}
     """
-    print("Adding {} to ticker list".format(next(iter(new_ticker))))
+    logging.debug("Adding {} to ticker list".format(next(iter(new_ticker))))
     with open("seen_tickers.json", "r+") as file:
         data = json.load(file)
         data.update(new_ticker)
@@ -59,6 +60,40 @@ def add_new_ticker(ticker: str):
         print("{} is not a known ticker".format(ticker))
 
 
+def is_possible_ticker(tick_str: str):
+    """
+    Parse tick_str to check if it string is between 1 and 6 characters and is uppercase
+    :param tick_str: String holding possible ticker
+    :return: True if possible ticker, false otherwise
+    """
+    if not isinstance(tick_str, str):
+        raise TypeError("Given object is not a string: {} is {}".format(tick_str, type(tick_str)))
+
+    if tick_str.isupper() and 1 <= len(tick_str) <= 6:
+        return True
+    else:
+        return False
+
+
+def check_comment_str(comment: str):
+    """
+    Parses through a comment string to check for possible tickers
+    Adds actual tickers to the seen_tickers.json file
+    :param comment:
+    :return:
+    """
+    print("Checking comment string")
+
+
 if __name__ == "__main__":
-    tick = "AMOV"
-    add_new_ticker(tick)
+    test_str = "this string contains AMOV a possible ticker"
+
+    for item in test_str.split(" "):
+        is_possible_ticker(item)
+
+    try:
+        is_possible_ticker(4)
+    except TypeError as err:
+        logging.exception(err.args)
+
+    add_new_ticker(test_str)
