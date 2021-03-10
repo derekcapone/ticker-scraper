@@ -8,10 +8,10 @@ def get_company_name(ticker):
     """
     Gets company name from Yahoo finance given ticker
     Note: Tickers are case sensitive and must be upper-case
-    :param symbol: String holding ticker
+    :param ticker: String holding ticker
     :return: String holding company name
     """
-    logging.debug("Checking if {} is valid ticker".format(ticker))
+    logging.info("Checking if {} is valid ticker".format(ticker))
     url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query={}&region=1&lang=en".format(ticker)
     result = requests.get(url).json()
 
@@ -21,19 +21,22 @@ def get_company_name(ticker):
             return x['name']
 
 
-def ticker_seen(ticker):
+def is_ticker_seen(ticker):
     """
-    Checks seen_tickers.json for whether the ticker has already been tracked
+    Checks for whether the ticker has already been tracked
     :param ticker:
-    :return:
+    :return: String containing company name if ticker already seen, None otherwise
     """
-    logging.debug("Checking if {} already in list")
+    logging.info("Checking if {} already in list".format(ticker))
     with open("seen_tickers.json", "r+") as file:
         data = json.load(file)
-        if data[ticker]:
-            print("Found")
-        else:
-            print("Not found")
+        try:
+            company_name = data[ticker]
+        except KeyError:
+            print("KeyError occurred")
+            company_name = None
+        finally:
+            return company_name
 
 
 def update_seen_tickers(new_ticker: dict):
@@ -41,7 +44,7 @@ def update_seen_tickers(new_ticker: dict):
     Updates seen_tickers.json with new ticker
     :param new_ticker: dict holding ticker and company name: {"ticker": "company name"}
     """
-    logging.debug("Adding {} to ticker list".format(next(iter(new_ticker))))
+    logging.info("Adding {} to ticker list".format(next(iter(new_ticker))))
     with open("seen_tickers.json", "r+") as file:
         data = json.load(file)
         data.update(new_ticker)
@@ -61,7 +64,7 @@ def add_new_ticker(ticker: str):
         new_company = {ticker: company}
         update_seen_tickers(new_company)
     else:
-        logging.debug("{} is not a known ticker".format(ticker))
+        logging.info("{} is not valid ticker".format(ticker))
 
 
 def is_possible_ticker(tick_str: str):
@@ -89,13 +92,36 @@ def check_comment_str(comment: str):
     ticker_list = []
     for item in comment.split(" "):
         if is_possible_ticker(item):
-            logging.debug("Found possible ticker: {}".format(item))
+            logging.info("Found possible ticker: {}".format(item))
             ticker_list.append(item)
     return ticker_list
 
 
+def parse_possible_tickers(ticker_list: list):
+    """
+    Goes through ticker_list and checks each string to see if it's a valid ticker
+    If ticker is valid, checks seen tickers for this, adds to seen tickers if valid
+    :param ticker_list: list of possible tickers with correct structure
+    """
+    logging.info("Checking ticker_list...")
+
+    for ticker in ticker_list:
+        if not isinstance(ticker, str):
+            raise TypeError("Given object is not a string: {} is {}".format(ticker, type(ticker)))
+            return
+
+        if is_ticker_seen(ticker) != None:
+            logging.info("Ticker {} has already been seen".format(ticker))
+            # TODO: Add functionality to update how many times ticker has been seen, date seen, etc in json file
+        else:
+            add_new_ticker(ticker)
+
+
+
 if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.INFO) #just for informational purposes
+
     test_str = "this ADC string ADM contains CEO AMOV a FCAC possible FCST ticker"
 
     list_of_tickers = check_comment_str(test_str)
-    print(list_of_tickers)
+    parse_possible_tickers(list_of_tickers)
