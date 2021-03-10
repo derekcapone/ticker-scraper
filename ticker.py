@@ -36,7 +36,6 @@ def ticker_seen(ticker):
             print("Not found")
 
 
-
 def update_seen_tickers(new_ticker: dict):
     """
     Updates seen_tickers.json with new ticker
@@ -51,24 +50,26 @@ def update_seen_tickers(new_ticker: dict):
 
 
 def add_new_ticker(ticker: str):
+    """
+    Checks if ticker corresponds to actual company, adds to seen_tickers.json if so, discard otherwise
+    :param ticker: String holding possible ticker
+    :return:
+    """
     company = get_company_name(ticker)
 
     if company is not None:
         new_company = {ticker: company}
         update_seen_tickers(new_company)
     else:
-        print("{} is not a known ticker".format(ticker))
+        logging.debug("{} is not a known ticker".format(ticker))
 
 
 def is_possible_ticker(tick_str: str):
     """
-    Parse tick_str to check if it string is between 1 and 6 characters and is uppercase
+    Parse tick_str to check if string is between 1 and 6 characters and is uppercase (structure of ticker symbols)
     :param tick_str: String holding possible ticker
     :return: True if possible ticker, false otherwise
     """
-    if not isinstance(tick_str, str):
-        raise TypeError("Given object is not a string: {} is {}".format(tick_str, type(tick_str)))
-
     if tick_str.isupper() and 1 <= len(tick_str) <= 6:
         return True
     else:
@@ -78,22 +79,23 @@ def is_possible_ticker(tick_str: str):
 def check_comment_str(comment: str):
     """
     Parses through a comment string to check for possible tickers
-    Adds actual tickers to the seen_tickers.json file
-    :param comment:
-    :return:
+    Generates list of possible tickers to check
+    :param comment: String holding comments
+    :return: List of possible tickers
     """
-    print("Checking comment string")
+    if not isinstance(comment, str):
+        raise TypeError("Given object is not a string: {} is {}".format(comment, type(comment)))
+
+    ticker_list = []
+    for item in comment.split(" "):
+        if is_possible_ticker(item):
+            logging.debug("Found possible ticker: {}".format(item))
+            ticker_list.append(item)
+    return ticker_list
 
 
 if __name__ == "__main__":
-    test_str = "this string contains AMOV a possible ticker"
+    test_str = "this ADC string ADM contains CEO AMOV a FCAC possible FCST ticker"
 
-    for item in test_str.split(" "):
-        is_possible_ticker(item)
-
-    try:
-        is_possible_ticker(4)
-    except TypeError as err:
-        logging.exception(err.args)
-
-    add_new_ticker(test_str)
+    list_of_tickers = check_comment_str(test_str)
+    print(list_of_tickers)
