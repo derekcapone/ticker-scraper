@@ -1,6 +1,7 @@
 import requests
 import json
 import logging
+import re
 import argparse
 
 
@@ -33,7 +34,6 @@ def is_ticker_seen(ticker):
         try:
             company_name = data[ticker]
         except KeyError:
-            print("KeyError occurred")
             company_name = None
         finally:
             return company_name
@@ -90,7 +90,7 @@ def check_comment_str(comment: str):
         raise TypeError("Given object is not a string: {} is {}".format(comment, type(comment)))
 
     ticker_list = []
-    for item in comment.split(" "):
+    for item in re.split('\s|,|\.|!', comment):
         if is_possible_ticker(item):
             logging.info("Found possible ticker: {}".format(item))
             ticker_list.append(item)
@@ -121,7 +121,7 @@ def parse_possible_tickers(ticker_list: list):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO) #just for informational purposes
 
-    test_str = "this ADC string ADM contains CEO AMOV a FCAC possible FCST ticker"
+    test_str = "this ADC. string ADM, contains CEO! AMOV a FCAC possible FCST ticker"
 
     list_of_tickers = check_comment_str(test_str)
     parse_possible_tickers(list_of_tickers)
