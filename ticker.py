@@ -5,6 +5,41 @@ import re
 import argparse
 
 
+class TickerInfo:
+    def __init__(self, ticker):
+        self.ticker = ticker
+        self.company_name = None
+        self.company_seen = None
+        self.valid_ticker = None
+
+        self.init_company_details()
+
+    def init_company_details(self):
+        """
+        Initialize company details
+        """
+        self.company_name = None
+        self.company_seen = False
+        self.valid_ticker = False
+        # TODO: once more details about seen companies are stored, add those details here
+        name = is_ticker_seen(self.ticker)
+        if name != None:
+            # Valid stock ticker we've already seen
+            self.company_name = name
+            self.company_seen = True
+            self.valid_ticker = True
+            return
+        name = get_company_name(self.ticker)
+        if name != None:
+            # Valid stock ticker we haven't seen
+            self.company_name = name
+            self.valid_ticker = True
+
+            update_seen_tickers({self.ticker: self.company_name})
+
+        return
+
+
 def get_company_name(ticker):
     """
     Gets company name from Yahoo finance given ticker
@@ -104,24 +139,21 @@ def parse_possible_tickers(ticker_list: list):
     :param ticker_list: list of possible tickers with correct structure
     """
     logging.info("Checking ticker_list...")
-
+    company_list = []
     for ticker in ticker_list:
         if not isinstance(ticker, str):
             raise TypeError("Given object is not a string: {} is {}".format(ticker, type(ticker)))
             return
 
-        if is_ticker_seen(ticker) != None:
-            logging.info("Ticker {} has already been seen".format(ticker))
-            # TODO: Add functionality to update how many times ticker has been seen, date seen, etc in json file
-        else:
-            add_new_ticker(ticker)
+        new_company = TickerInfo(ticker)
+        if new_company.valid_ticker == True:
+            company_list.append(new_company)
 
+    return company_list
 
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.INFO) #just for informational purposes
-
     test_str = "this ADC. string ADM, contains CEO! AMOV a FCAC possible FCST ticker"
 
     list_of_tickers = check_comment_str(test_str)
-    parse_possible_tickers(list_of_tickers)
+    active_companies = parse_possible_tickers(list_of_tickers)
