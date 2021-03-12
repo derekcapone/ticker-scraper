@@ -57,10 +57,10 @@ def insert_document(collection, new_dict):
 
 
 if __name__ == "__main__":
-    col = connect_to_collection("Test")
+    col = connect_to_collection()
 
     dic = {
-        "name": "TestData2",
+        "name": "TestData3",
         "OtherData": {
             "Embedded1": 1,
             "Embedded2": 2
