@@ -13,6 +13,7 @@ class TickerInfo:
         self.company_seen = None
         self.valid_ticker = None
         self.date_last_accessed = None
+        self.data_type = "company"
 
         self.init_company_details()
 
@@ -46,7 +47,8 @@ class TickerInfo:
         new_dict = {
             "ticker": self.ticker,
             "company_name": self.company_name,
-            "date_accessed": self.date_last_accessed.strftime("%d-%m-%Y")
+            "date_accessed": self.date_last_accessed.strftime("%d-%m-%Y"),
+            "data_type": self.data_type
         }
         return new_dict
 
@@ -172,7 +174,19 @@ def parse_possible_tickers(ticker_list: list):
     return company_list
 
 
-if __name__ == "__main__":
+def delete_all_company_data():
+    """
+    Deletes the entire collection of company data
+    """
+    col = mng.connect_to_collection()
+    col.delete_many(filter={"data_type": "company"})
+
+
+def test_add_tickers_from_string():
+    """
+    Test function display how the adding company info to the
+    :return:
+    """
     test_str = "this ADC. string ADM, contains CEO! AMOV a FCAC possible FCST ticker"
 
     list_of_tickers = check_comment_str(test_str)
@@ -180,3 +194,7 @@ if __name__ == "__main__":
 
     for company in active_companies:
         insert_company_info(company)
+
+
+if __name__ == "__main__":
+    test_add_tickers_from_string()

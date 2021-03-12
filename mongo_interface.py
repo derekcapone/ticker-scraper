@@ -36,13 +36,14 @@ def find_top_layer_obj(collection, obj_name):
     return list(collection.find(search_dic))
 
 
-def find_populated_field(collection, search_dic):
+def find_populated_field(search_dic):
     """
     Searches for a desired populated field, given field name, and value
     :param collection: MongoDB Collection object to search
     :param search_dic: Dictionary to search for
     :return: List of all matching objects
     """
+    collection = connect_to_collection()
     return list(collection.find(search_dic))
 
 
