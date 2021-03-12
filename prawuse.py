@@ -1,19 +1,6 @@
 import json
 import praw
-import datetime
-
-
-def get_private_value(val_name):
-    """
-    Gets a value from the private
-    :param val_name: name of private value to retrieve
-    :return: string containing private value
-    """
-    f = open("PrivateValues.json")
-    priv_str = f.read()
-    f.close()
-    ret_dict = json.loads(priv_str)
-    return ret_dict[val_name]
+import privdata
 
 
 def get_reddit_instance():
@@ -21,11 +8,11 @@ def get_reddit_instance():
     Retrieves private values and instantiates an instance of praw.Reddit
     :return: Instance of praw.Reddit
     """
-    c_id = get_private_value("client_id")
-    c_secret = get_private_value("client_secret")
-    ua = get_private_value("user_agent")
-    user = get_private_value("username")
-    pw = get_private_value("password")
+    c_id = privdata.get_private_value("client_id")
+    c_secret = privdata.get_private_value("client_secret")
+    ua = privdata.get_private_value("user_agent")
+    user = privdata.get_private_value("username")
+    pw = privdata.get_private_value("reddit_pw")
 
     r = praw.Reddit(
         client_id=c_id,
