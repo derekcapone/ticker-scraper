@@ -46,25 +46,22 @@ def find_populated_field(collection, search_dic):
     return list(collection.find(search_dic))
 
 
-def insert_document(collection, new_dict):
+def insert_document(new_dict):
     """
     Inserts a single document into the collection provided
     :param collection: MongoDB Collection object
     :param new_dict: dict to be inserted into collection
     :return: Resulting InsertOneResult object
     """
+    collection = connect_to_collection()
     return collection.insert_one(new_dict)
 
 
 if __name__ == "__main__":
-    col = connect_to_collection()
-
     dic = {
-        "name": "TestData3",
-        "OtherData": {
-            "Embedded1": 1,
-            "Embedded2": 2
-        }
+        "ticker": "ABCD",
+        "company_name": "Testing",
+        "Test": True
     }
 
-    insert_document(col, dic)
+    insert_document(dic)

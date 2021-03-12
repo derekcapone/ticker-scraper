@@ -2,7 +2,8 @@ import requests
 import json
 import logging
 import re
-import argparse
+import datetime
+import mongo_interface as mng
 
 
 class TickerInfo:
@@ -11,6 +12,7 @@ class TickerInfo:
         self.company_name = None
         self.company_seen = None
         self.valid_ticker = None
+        self.date_last_accessed = None
 
         self.init_company_details()
 
@@ -21,6 +23,7 @@ class TickerInfo:
         self.company_name = None
         self.company_seen = False
         self.valid_ticker = False
+        self.date_last_accessed = datetime.date.today()
         # TODO: once more details about seen companies are stored, add those details here
         name = is_ticker_seen(self.ticker)
         if name != None:
@@ -36,8 +39,16 @@ class TickerInfo:
             self.valid_ticker = True
 
             update_seen_tickers({self.ticker: self.company_name})
-
         return
+
+    def generate_company_dict(self):
+        # TODO: Figure out how to do this part with pre-defined schema
+        new_dict = {
+            "ticker": self.ticker,
+            "company_name": self.company_name,
+            "date_accessed": self.date_last_accessed.strftime("%d-%m-%Y")
+        }
+        return new_dict
 
 
 def get_company_name(ticker):
@@ -55,6 +66,15 @@ def get_company_name(ticker):
         # check response for company (account for appended characters on ticker symbol in result)
         if x['symbol'] == ticker:
             return x['name']
+
+
+def insert_company_info(company: TickerInfo):
+    """
+    Inserts the company info as a dict into MongoDB
+    :param company:
+    :return:
+    """
+    mng.insert_document(company.generate_company_dict())
 
 
 def is_ticker_seen(ticker):
@@ -157,3 +177,6 @@ if __name__ == "__main__":
 
     list_of_tickers = check_comment_str(test_str)
     active_companies = parse_possible_tickers(list_of_tickers)
+
+    for company in active_companies:
+        insert_company_info(company)
