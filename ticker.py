@@ -76,7 +76,7 @@ def insert_company_info(company: TickerInfo):
     :param company:
     :return:
     """
-    mng.insert_document(company.generate_company_dict())
+    mng.insert_single_document(company.generate_company_dict())
 
 
 def is_ticker_seen(ticker):
@@ -174,6 +174,25 @@ def parse_possible_tickers(ticker_list: list):
     return company_list
 
 
+def get_existing_company(ticker: str):
+    """
+    Search for company in database
+    :param collection: MongoDB collection holding company information
+    :param ticker: Ticker symbol
+    :return: Company object
+    """
+    search_dic = {"ticker": ticker}
+    ret_list = mng.find_populated_field(search_dic)
+
+    if len(ret_list) == 0:
+        return None
+    elif len(ret_list) == 1:
+        return ret_list[0]
+    else:
+        raise mng.StoredDuplicate("Duplicate item found: {}".format(ticker))
+        return None
+
+
 def delete_all_company_data():
     """
     Deletes the entire collection of company data
@@ -197,4 +216,6 @@ def test_add_tickers_from_string():
 
 
 if __name__ == "__main__":
-    test_add_tickers_from_string()
+    ticker = "ADC"
+    active = get_existing_company(ticker)
+    print(active)

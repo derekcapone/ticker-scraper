@@ -2,6 +2,23 @@ import pymongo
 import privdata
 
 
+class StoredDuplicate(Exception):
+    """
+    Error class for stored duplicate item in MongoDB database
+    """
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+
+    def __str__(self):
+        if self.message:
+            return 'StoredDuplicate, {0} '.format(self.message)
+        else:
+            return "StoredDuplicate error is raised"
+
+
 def connect_to_database():
     """
     Connects to database
@@ -47,7 +64,7 @@ def find_populated_field(search_dic):
     return list(collection.find(search_dic))
 
 
-def insert_document(new_dict):
+def insert_single_document(new_dict):
     """
     Inserts a single document into the collection provided
     :param collection: MongoDB Collection object
@@ -65,4 +82,4 @@ if __name__ == "__main__":
         "Test": True
     }
 
-    insert_document(dic)
+    insert_single_document(dic)
