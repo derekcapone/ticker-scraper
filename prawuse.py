@@ -1,4 +1,3 @@
-import json
 import praw
 import privdata
 
@@ -24,11 +23,29 @@ def get_reddit_instance():
     return r
 
 
-if __name__ == "__main__":
+def get_hot_posts(sub_name: str, num_posts=10):
+    """
+    Gets ListGenerator for hot posts in given subreddit. Retrieves "num_posts" posts
+    :param sub_name: String holding the subreddit name
+    :param num_posts: Number of posts to retrieve
+    :return: ListGenerator for hot posts in subreddit
+    """
     reddit = get_reddit_instance()
-    subreddit = reddit.subreddit("wallstreetbets")
+    subreddit = reddit.subreddit(sub_name)
+    return subreddit.hot(limit=num_posts)
 
-    for submission in subreddit.hot(limit=3):
-        comment_queue = submission.comments[:100]  # Get first 100 comments
-        info_string = "{} has {} comments".format(submission.title, len(comment_queue))
-        print(info_string)
+
+def get_top_comments(sub_generator, num_comments: int):
+    if not isinstance(sub_generator, praw.models.listing.generator.ListingGenerator):
+        raise TypeError("Object is not a subreddit ListingGenerator")
+
+    comment_tree = []
+    for submission in sub_generator:
+        comment_tree.append(submission.comments[:num_comments])
+
+    return comment_tree
+
+
+if __name__ == "__main__":
+    sub_generator = get_hot_posts("wallstreetbets", 5)
+    comment_tree = get_top_comments(sub_generator, 100)
