@@ -56,7 +56,6 @@ def find_top_layer_obj(collection, obj_name):
 def find_populated_field(search_dic):
     """
     Searches for a desired populated field, given field name, and value
-    :param collection: MongoDB Collection object to search
     :param search_dic: Dictionary to search for
     :return: List of all matching objects
     """
@@ -67,7 +66,6 @@ def find_populated_field(search_dic):
 def insert_single_document(new_dict):
     """
     Inserts a single document into the collection provided
-    :param collection: MongoDB Collection object
     :param new_dict: dict to be inserted into collection
     :return: Resulting InsertOneResult object
     """
@@ -79,7 +77,7 @@ if __name__ == "__main__":
     dic = {
         "ticker": "ABCD",
         "company_name": "Testing",
-        "Test": True
+        "Test": True,
     }
 
     insert_single_document(dic)
